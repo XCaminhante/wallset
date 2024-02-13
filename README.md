@@ -1,61 +1,99 @@
 # wallset
-A wallpaper manager that makes it possible to put videos as wallpaper
+A wallpaper manager that makes it possible to show videos as live wallpapers
 
 # Installation
-First you will need to have the dependencies installed on your system:
+First you will need to have these dependencies installed on your system:
++ [bash >=4.0](http://tiswww.case.edu/php/chet/bash/bashtop.html)
++ [sed >=4.5](http://sed.sourceforge.net/)
 + [ffmpeg >=4.2.3](https://ffmpeg.org/)
 + [feh >=3.4.1](https://feh.finalrewind.org/)
 + [imagemagick >=7.0.10.16](https://www.imagemagick.org/)
-+ [xrandr >=1.5.1](https://gitlab.freedesktop.org/xorg/app/xrandr)
-+ [xdg-utils >=1.1.3](https://www.freedesktop.org/wiki/Software/xdg-utils/)
-+ [bash >=4.0](http://tiswww.case.edu/php/chet/bash/bashtop.html)
-+ [sed >=4.5](http://sed.sourceforge.net/)
-> Some software may work in versions lower than those reported.
++ [procps >=2.3](https://packages.debian.org/stable/procps)
+
+If you're on Debian stable or any mainstream and updated GNU/Linux distro, you should be good.
 
 ```sh
-git clone https://github.com/terroo/wallset wallset
+git clone https://github.com/XCaminhante/wallset
 cd wallset
 cp -v ./wallset ~/.local/bin
-# otherwise, to keep updating the script with git:
+# Otherwise, to keep updating the script with git:
 ln -svf $PWD/wallset ~/.local/bin/
+# Then add a wallpaper or configure wallset
 ```
 
-# Use
+# Usage
 ```sh
-usage: wallset [options]
+Wallset: shows one or more images in a loop as a live wallpaper
+Version 0.2
 
-  Options:
-    -u,--use [N]          Change the Wallpaper to the number entered. Use images with 3 digits, example: 014,003,099
-    -a,--add img.jpg ...  Add images
-    -S,--set              Use before the -a, --add parameter when you want to add already change
-    -q,--quit             Ends the loop
-    -t,--time [N]         Creates an image loop with the time reported in seconds
-    -d,--display          Opens the last image added
-    -c,--count            Informs how many images there are
-    -s,--show             Shows the current image
-    -V,--video [video]    Add a video as Wallpaper
-    -L,--list-videos      Lists the videos that have already been used
-    -I,--set-video [N]    Use the video by the number listed in --list-videos
-    -r,--remove           Remove the last image added
-    -h,--help             Display this help
-    -v,--version          Display the version of this program
+Usage: wallset [options]
+Options:
+  -i,--image <image file.{jpg,png}>
+  Replaces the current set of wallpaper images with this image
+  Use any file format supported by imagemagick
 
-  Examples:
-    Add an image → 'wallset -a img.jpg'
-    Add and set it as Wallpaper → 'wallset --set --add img.jpg'
-    Change to image with this number → 'wallset -u 001'
-    Add the video → 'wallset -V video.mp4'
-    Use the video already used and listed → 'wallset -I 3'
+  -v,--video <video file.{mp4,mkv,webm}>
+  Replaces the current set of wallpaper images for the frames of a video excerpt
+  Use any file format supported by ffmpeg
 
-* [N] Means that you need to use a number
-** Only videos in .mp4 format
-*** Only the first 10 seconds of the video will be displayed
-**** Use 3-digit images, example: 011
+  -f,--from 00:00
+  Pass this argument before -v, it defines from which point in the video the excerpt starts
+  By default, wallset extracts the excerpt from the beginning of the video (point 00:00)
+  Consult the ffmpeg manual if you have any doubts about the syntax
+
+  -d,--duration 10s
+  Pass this argument before -v, it defines how many seconds to extract from the video
+  By default, wallset extracts 10 seconds from the video (that's approximately 300 frames)
+  Consult the ffmpeg manual if you have any doubts about the syntax
+
+  -a,--append-image <image file.{jpg,png}>
+  Appends an image to the current wallpaper image set
+  This argument can be used several times on the same command line
+  It can be used in conjunction with -i or -v, but must appear after both of them
+  Use any file format supported by imagemagick
+
+  -t,--transition 0.1
+  Sets the approximate time between one image and the next in the wallpaper display
+  By default wallset uses 0.1 second
+  Don't use sleep suffixes, only pass the float number of seconds
+
+  -z,--zoom-mode <fill|scale|center|tile|max>
+  Sets the zoom mode feh will use when applying each image at the background
+  Consult the feh manpage, specifically the --bg-* arguments, if you have any doubts about their effects
+
+  -p,--pause
+  Stops the wallpaper image display loop
+
+  -s,--start
+  Starts the wallpaper image display loop
+  When you use the -i or -v arguments, the loop starts automatically
+
+  -c,--config
+  Shows the actual configuration.
+
+  --loop
+  For internal use only.
+
+  -h,--help
+  Shows this message
+
+The set of images is stored in ~/.config/wallset/
 ```
 
 # Uninstall
 ```sh
+# First stop the wallpaper repaint loop:
+wallset --pause
 rm -v ~/.local/bin/wallset
-# do whatever with the git repo you downloaded
+# Do whatever you want with the git repo you downloaded
 ```
+
+# Differences at this fork
+* Complete code rewrite.
+* No more wallpaper selector numbers. You set one live (or static) wallpaper at a time.
+* No more tinkering with `gsettings` or `~/.fehbg`
+* More configurable.
+* You can append new images to the current wallpaper frames set.
+You can add several static images and set a longer transition time, for example.
+* Smarter wallpaper repaint loop logic. No more `killall bash`. No running a loop if there's only a single (or none) frame.
 

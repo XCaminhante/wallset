@@ -9,11 +9,28 @@
 <v t="caminhante.20240213010554.2"><vh>Wallset</vh></v>
 <v t="caminhante.20240213010645.1"><vh>@path .</vh>
 <v t="caminhante.20240213010725.7"><vh>/.git/</vh></v>
-<v t="caminhante.20240213010725.6"><vh>/examples/</vh></v>
-<v t="caminhante.20240213010725.5"><vh>LICENSE</vh></v>
+<v t="caminhante.20240213010725.6"><vh>/examples/</vh>
+<v t="caminhante.20240213163258.2"><vh>/videos/</vh>
+<v t="caminhante.20240213163300.5"><vh>abstract-city.mp4</vh></v>
+<v t="caminhante.20240213163300.4"><vh>alien-city.mp4</vh></v>
+<v t="caminhante.20240213163300.3"><vh>bee-hive.mp4</vh></v>
+<v t="caminhante.20240213163300.2"><vh>car-on-the-streets.mp4</vh></v>
+<v t="caminhante.20240213163300.1"><vh>other-car-lights.mp4</vh></v>
+</v>
+<v t="caminhante.20240213163258.1"><vh>/wallpapers/</vh>
+<v t="caminhante.20240213163302.6"><vh>example-to-wallset-1.png</vh></v>
+<v t="caminhante.20240213163302.5"><vh>example-to-wallset-2.jpg</vh></v>
+<v t="caminhante.20240213163302.4"><vh>example-to-wallset-3.jpg</vh></v>
+<v t="caminhante.20240213163302.3"><vh>example-to-wallset-4.jpg</vh></v>
+<v t="caminhante.20240213163302.2"><vh>example-to-wallset-5.jpg</vh></v>
+<v t="caminhante.20240213163302.1"><vh>example-to-wallset-6.jpg</vh></v>
+</v>
+</v>
 <v t="caminhante.20240213010725.4"><vh>@auto README.md</vh></v>
+<v t="caminhante.20240213010725.5"><vh>@edit LICENSE</vh></v>
 <v t="caminhante.20240213010725.2"><vh>@file wallset</vh></v>
 <v t="caminhante.20240213010725.1"><vh>wallset.leo</vh></v>
+<v t="caminhante.20240213161011.1"><vh>wallset.leo.bak</vh></v>
 </v>
 <v t="caminhante.20230226160006.1"><vh>@settings</vh>
 <v t="caminhante.20200618180759.1"><vh>@command terminal-here @key=Alt-T</vh></v>
@@ -275,8 +292,21 @@ c.redraw(c.p)
 <t tx="caminhante.20240213010554.2"></t>
 <t tx="caminhante.20240213010645.1"></t>
 <t tx="caminhante.20240213010725.1"></t>
-<t tx="caminhante.20240213010725.5"></t>
 <t tx="caminhante.20240213010725.6">@path examples</t>
 <t tx="caminhante.20240213010725.7">@path .git</t>
+<t tx="caminhante.20240213161011.1"></t>
+<t tx="caminhante.20240213163258.1">@path wallpapers</t>
+<t tx="caminhante.20240213163258.2">@path videos</t>
+<t tx="caminhante.20240213163300.1"></t>
+<t tx="caminhante.20240213163300.2"></t>
+<t tx="caminhante.20240213163300.3"></t>
+<t tx="caminhante.20240213163300.4"></t>
+<t tx="caminhante.20240213163300.5"></t>
+<t tx="caminhante.20240213163302.1"></t>
+<t tx="caminhante.20240213163302.2"></t>
+<t tx="caminhante.20240213163302.3"></t>
+<t tx="caminhante.20240213163302.4"></t>
+<t tx="caminhante.20240213163302.5"></t>
+<t tx="caminhante.20240213163302.6"></t>
 </tnodes>
 </leo_file>

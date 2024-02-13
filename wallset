@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 #@+leo-ver=5-thin
 #@+node:caminhante.20240213010725.2: * @file wallset
 #@@first
@@ -6,279 +6,257 @@
 shopt -s extglob
 #@+others
 #@+node:caminhante.20240213012511.1: ** /sobre
+#@+at
 # wallset: This program customizes images and videos for wallpaper
-# website: http://terminalroot.com.br/
 # author: Marcos Oliveira
+# website: https://terminalroot.com.br/
 # contributor: X Caminhante
-# dependencies: feh, ffmpeg, imagemagick(convert), xrandr, sed, bash, xdg-utils
+# website: 
+# dependencies: bash, sed, ffmpeg, feh, imagemagick(convert), procps(pgrep)
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#@+node:caminhante.20240213012458.1: ** /variáveis
-_dir_img="${HOME}/.config/wallset"
-_dir_vid="${_dir_img}/video"
-pid="$$"
-#@+node:caminhante.20240213012446.1: *3* $lang
-if [[ $(echo $LANG | cut -c 1-2) == 'pt' ]]; then
-    _lang=("uso" "opções" "Altera o Wallpaper para o número informado. Use imagens com 3 dígitos, exemplo: 014,003,099" "Adiciona imagens" "Use antes do parâmetro -a,--add quando quiser adicionar já alterar" "Finaliza o loop" "Cria um loop de imagem com o tempo informado em segundos" "Abre a última imagem adicionada" "Informa quantas imagens há" "Mostra a atual imagem" "Adiciona um vídeo como Wallpaper" "Lista os vídeos que já foram utilizados" "Utiliza o vídeo pelo número listado em --list-videos" "Remove a última imagem adicionada" "Exibe essa ajuda" "Exibe a versão desse programa" "Exemplos" "Adiciona uma imagem" "Adiciona e já define como Wallpaper" "Altera para imagem com esse número" "Adiciona o vídeo" "Usa o vídeo já utilizado e listado" "Significa que precisa usar um número" "Somente vídeos nos formato .mp4" "Somente será exibido 10 segundos iniciais do vídeo" "Use imagens com 3 dígitos, exemplo: 011" "Não há nenhuma imagem." "Preparando o vídeo" "Use números indicados por" "Use números de 1 até" "Tempo inválido" "Tipo inválido" "Use números de 001 até" "Formato inválido." "Somente formato MP4" "Número inválido. Use" "Informe o vídeo" "Não há imagens." "Não há vídeos.")
-else
-    _lang=("usage" "options" "Change the Wallpaper to the number entered. Use images with 3 digits, example: 014,003,099" "Add images" "Use before the -a, --add parameter when you want to add already change" "Ends the loop" "Creates an image loop with the time reported in seconds" "Opens the last image added" "Informs how many images there are" "Shows the current image" "Add a video as Wallpaper" "Lists the videos that have already been used" "Use the video by the number listed in --list-videos" "Remove the last image added" "Display this help" "Display the version of this program" "Examples" "Add an image" "Add and set it as Wallpaper" "Change to image with this number" "Add the video" "Use the video already used and listed" "Means that you need to use a number" "Only videos in .mp4 format" "Only the first 10 seconds of the video will be displayed" "Use 3-digit images, example: 011" "There is no image." "Preparing the video..." "Use numbers indicated by" "Use numbers numbers from 1 to" "Invalid time" "Invalid type" "Use numbers from 001 to" "Invalid format." "MP4 format only" "Invalid number. Use" "Report Video" "No images." "No videos.")
-fi
-#@+node:caminhante.20240213012426.1: ** _usage
+# This program is free software: you can redistribute it and/or modify it under the terms of
+# the GNU General Public License as published by the Free Software Foundation, either
+# version 3 of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+# without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with this program.
+# If not, see <https://www.gnu.org/licenses/>.
+#@+node:caminhante.20240213012426.1: ** function _usage
 function _usage {
-  cat <<EOF
-${_lang[0]}: ${0##*/} [${_lang[1]}]
-  Options:
-    -u,--use [N]          ${_lang[2]}
-    -a,--add img.jpg ...  ${_lang[3]}
-    -S,--set              ${_lang[4]}
-    -q,--quit             ${_lang[5]}
-    -t,--time [N]         ${_lang[6]}
-    -d,--display          ${_lang[7]}
-    -c,--count            ${_lang[8]}
-    -s,--show             ${_lang[9]}
-    -V,--video [video]    ${_lang[10]}
-    -L,--list-videos      ${_lang[11]}
-    -I,--set-video [N]    ${_lang[12]}
-    -r,--remove           ${_lang[13]}
-    -h,--help             ${_lang[14]}
-    -v,--version          ${_lang[15]}
+  sed '/^#/d; /^`/d;' <<'EOF'
+#@+others
+#@+node:caminhante.20240213142725.1: *3* Usage
+```sh
+Wallset: shows one or more images in a loop as a live wallpaper
+Version 0.2
 
-  ${_lang[16]}:  
-    ${_lang[17]} → '${0##*/} -a img.jpg'
-    ${_lang[18]} → '${0##*/} --set --add img.jpg'
-    ${_lang[19]} → '${0##*/} -u 001'
-    ${_lang[20]} → '${0##*/} -V video.mp4'
-    ${_lang[21]} → '${0##*/} -I 3'
+Usage: wallset [options]
+Options:
+  -i,--image <image file.{jpg,png}>
+  Replaces the current set of wallpaper images with this image
+  Use any file format supported by imagemagick
 
-* [N] ${_lang[22]}
-** ${_lang[23]}
-*** ${_lang[24]}
-**** ${_lang[25]}
+  -v,--video <video file.{mp4,mkv,webm}>
+  Replaces the current set of wallpaper images for the frames of a video excerpt
+  Use any file format supported by ffmpeg
+
+  -f,--from 00:00
+  Pass this argument before -v, it defines from which point in the video the excerpt starts
+  By default, wallset extracts the excerpt from the beginning of the video (point 00:00)
+  Consult the ffmpeg manual if you have any doubts about the syntax
+
+  -d,--duration 10s
+  Pass this argument before -v, it defines how many seconds to extract from the video
+  By default, wallset extracts 10 seconds from the video (that's approximately 300 frames)
+  Consult the ffmpeg manual if you have any doubts about the syntax
+
+  -a,--append-image <image file.{jpg,png}>
+  Appends an image to the current wallpaper image set
+  This argument can be used several times on the same command line
+  It can be used in conjunction with -i or -v, but must appear after both of them
+  Use any file format supported by imagemagick
+
+  -t,--transition 0.1
+  Sets the approximate time between one image and the next in the wallpaper display
+  By default wallset uses 0.1 second
+  Don't use sleep suffixes, only pass the float number of seconds
+
+  -z,--zoom-mode <fill|scale|center|tile|max>
+  Sets the zoom mode feh will use when applying each image at the background
+  Consult the feh manpage, specifically the --bg-* arguments, if you have any doubts about their effects
+
+  -p,--pause
+  Stops the wallpaper image display loop
+
+  -s,--start
+  Starts the wallpaper image display loop
+  When you use the -i or -v arguments, the loop starts automatically
+
+  -c,--config
+  Shows the actual configuration.
+
+  --loop
+  For internal use only.
+
+  -h,--help
+  Shows this message
+
+The set of images is stored in ~/.config/wallset/
+```
+#@-others
 EOF
 exit
 }
-#@+node:caminhante.20240213012318.1: ** ctrl_c
-function ctrl_c {
-  exit 127
+#@+node:caminhante.20240213125451.1: ** function _shell_sleep
+function _shell_sleep {
+  ! read -u 1 -t $1 2>/dev/null </dev/zero
 }
-#@+node:caminhante.20240213012304.1: ** _get_screen_width
-function _get_screen_width {
-  xrandr --current | sed -r '/current/!d; s/^.*current ([0-9]+) x.*$/\1/'
+#@+node:caminhante.20240213125458.1: ** function _shell_cat
+function _shell_cat {
+  local a
+  [[ $# -gt 0 ]] && \
+    { while read a; do echo $a; done } < "$1" || \
+    { while read a; do echo $a; done }
 }
-#@+node:caminhante.20240213012252.1: ** _last_wall
-function _last_wall {
-  ls ${_dir_img}/*.jpg 2>/dev/null >/dev/null
-  if [[ "$?" != "0" ]]; then
-    printf "%s" "0"
-  else
-    _n=$(ls -1 ${_dir_img}/*.jpg | tail -n 1 | tr -d 'a-z\.\-\/')
-    printf "%s" "${_n}"
-  fi
+#@+node:caminhante.20240213123219.1: ** function _feh_image
+function _feh_image {
+  local file="$1"
+  feh --no-fehbg --bg-${SCALE_MODE} "${file}" # 2>/dev/null >/dev/null
 }
-#@+node:caminhante.20240213012244.1: ** _new_number
-function _new_number {
-  _n=$(echo $(_last_wall) + 1 | bc)
-  [[ $(expr length ${_n}) == 1 ]] && _n="00${_n}" || _n="0${_n}"
-  printf "%s" "${_n}"
+#@+node:caminhante.20240213132656.1: ** function _clear_frames
+function _clear_frames {
+  _pause_wallpaper_loop
+  find "$WALLPAPER_DIR" -mindepth 1 -delete && \
+    echo "wallpaper frames set cleared"
 }
-#@+node:caminhante.20240213012231.1: ** _resize_img
-function _resize_img {
-  _n=$(_new_number)
-  _w=$(_get_screen_width)
-  convert -resize "${_w}" "${1}" "${_dir_img}/wallpaper-${_n}.jpg"
-  if [[ "${add}" == 1 ]]; then
-    feh --bg-scale "${_dir_img}/wallpaper-${_n}.jpg"
-    [[ $(which gsettings >&- 2>&-) ]] && \
-        gsettings set org.gnome.desktop.background picture-uri file:///"${_dir_img}/wallpaper-${_n}.jpg"
-  fi
+#@+node:caminhante.20240213123737.1: ** function _video_to_frames
+function _video_to_frames {
+  local origin="$1"
+  [[ -f "$origin" ]] || { echo "ERROR: _video_to_frames: origin file does not exist"; exit 1; }
+  echo "preparing frames..."
+  ffmpeg -y -ss $CUTSTART -i "$origin" -qscale:v 2 -t $DURATION \
+  "${WALLPAPER_DIR}/frame%08d.png" >/dev/null 2>&1 && \
+    echo "frames extrated from '${1}', cut starting at ${CUTSTART}, duration ${DURATION}"
 }
-#@+node:caminhante.20240213012221.1: ** _count
-function _count {
-  ls ${_dir_img}/*.jpg 2>/dev/null | wc -l
+#@+node:caminhante.20240213140604.1: ** function _utcnanodate
+function _utcnanodate {
+  date -u '+%FT%T.%NZ'
 }
-#@+node:caminhante.20240213012212.1: ** _current
-function _current {
-  xdg-open "${_dir_img}/wallpaper-$(_last_wall).jpg"
+#@+node:caminhante.20240213133653.1: ** function _append_image
+function _append_image {
+  local origin="$1"
+  # local destination="$(mktemp -u -p "$WALLPAPER_DIR" -t 'frameXXXXXXXX.png')"
+  local destination="${WALLPAPER_DIR}/frame$(_utcnanodate).png"
+  [[ -f "$origin" ]] || { echo "ERROR: _append_image: origin file does not exist"; exit 1; }
+  cp "$origin" "$destination" && \
+    echo "image '${1}' added to wallpaper frames set"
 }
-#@+node:caminhante.20240213012203.1: ** _loop
-function _loop {
-  # BUG esse loop não é interrompível externamente
-  if [[ $(_count) < 1 ]]; then
-    printf "%s\n" "${_lang[26]}"
-    exit 1
-  fi
-  i=1;
-  while : ; do
-    [[ "${i}" -ge "$(_count)" ]] && i=1
-    if [[ $(expr length $i) == 1 ]]; then
-      feh --bg-scale "${_dir_img}/wallpaper-00${i}.jpg"
-    else
-      feh --bg-scale "${_dir_img}/wallpaper-0${i}.jpg"
-    fi
-    sleep $1
-    let i=i+1
-  done &
+#@+node:caminhante.20240213134749.1: ** function _set_image
+function _set_image {
+  _clear_frames
+  _append_image "$1"
 }
-#@+node:caminhante.20240213011553.1: ** _quit_loop
-function _quit_loop {
-  # BUG isso mata todos os shells em execução no sistema
-  # BUG obviamente não é o objetivo da função
-  killall -q bash 2>/dev/null >/dev/null
-}
-#@+node:caminhante.20240213011507.1: ** _set_img
-function _set_img {
-  ls "${_dir_img}/wallpaper-${1}.jpg" >/dev/null 2>/dev/null
-  if [[ "$?" == 0 ]]; then
-    feh --bg-scale "${_dir_img}/wallpaper-$1.jpg"
-    if [[ $(which gsettings >&- 2>&-) && "$XDG_CURRENT_DESKTOP" == "GNOME" ]]; then
-      gsettings set org.gnome.desktop.background picture-uri file:///"${_dir_img}/wallpaper-$1.jpg"
-    fi
-  else
-    _t=$(_count)
-    [[ "${_t}" -lt 100 ]] && _t="0${_t}"
-    echo "$1 - ${_lang[35]}: "$(ls ${_dir_img} | sed 's/wallpaper-//;s/\.jpg/ /g')
-  fi
-}
-#@+node:caminhante.20240213011454.1: ** _show
-function _show {
-  egrep -o '[0-9]{3}' "${HOME}/.fehbg"
-}
-#@+node:caminhante.20240213011444.1: ** _video
-function _video {
-  a=1
-  for i in $(ls -d $_dir_vid/*/ 2>/dev/null); do
-    if [[ -d "$_dir_vid/$a" ]]; then
-      let a=a+1
-    fi
-  done
-
-  mkdir -p "$_dir_vid/$a"
-
-  echo -e "${_lang[27]}...\r"
-  ffmpeg -y -ss 00:00 -i ${1} -t 10 "${_dir_vid}/${a}/filename%05d.jpg" > ${_dir_vid}/${a}/video.info 2>&1
-  t=$(ls ${_dir_vid}/${a}/* | wc -l)
-  let t=t-1
-  echo ${1} > ${_dir_vid}/${a}/video.info
-
-  i=1
-  # ctrl_c
-  while : ; do
-    feh --bg-scale $(ls -1 ${_dir_vid}/${a}/* | sed -n "${i}p")
-    sleep 0.01
-    let i=i+1
-    [[ "${i}" -gt "${t}" ]] && i=1
-  done
-}
-#@+node:caminhante.20240213011430.1: ** _list_vid
-function _list_vid {
-  ls -d ${_dir_vid}/* 2>/dev/null >/dev/null
-  if [[ "$?" != "0" ]]; then
-    echo ${_lang[38]}
-    exit 1
-  fi
-  for i in $(ls -1 ${_dir_vid}/*/video.info); do
-    echo $i | awk 'BEGIN { FS = "/" } ; { print $6 }'
-    cat $i
-  done | paste - - | sed 's/\t/ → /g'
-}
-
-#@+node:caminhante.20240213011402.1: ** _set_video
+#@+node:caminhante.20240213134839.1: ** function _set_video
 function _set_video {
-  ls -d ${_dir_vid}/* 2>/dev/null >/dev/null
-  if [[ "$?" != "0" ]]; then
-    echo ${_lang[38]}
-    exit 1
-  fi
-  if [[ $(echo "$1" | sed -n -r '/^[0-9]+$/p') == "" ]]; then
-    echo "${_lang[28]} '${0##*/} --list-videos'."
+  _clear_frames
+  _video_to_frames "$1"
+}
+#@+node:caminhante.20240213124548.1: ** function _kill_loop
+function _kill_loop {
+  pgrep -f 'wallset --loop' | xargs -r kill -TERM
+}
+#@+node:caminhante.20240213135708.1: ** function _set_cutstart
+function _set_cutstart {
+  CUTSTART="$1"
+  _save_config && echo "CUTSTART set to ${CUTSTART}"
+}
+#@+node:caminhante.20240213135734.1: ** function _set_duration
+function _set_duration {
+  DURATION="$1"
+  _save_config && echo "DURATION set to ${DURATION}"
+}
+#@+node:caminhante.20240213135743.1: ** function _set_transition
+function _set_transition {
+  TRANSITION="$1"
+  _save_config && echo "TRANSITION set to ${TRANSITION}"
+}
+#@+node:caminhante.20240213135748.1: ** function _set_scale_mode
+function _set_scale_mode {
+  case "$1" in
+    'fill'|'scale'|'center'|'tile'|'max') ;;
+    *) echo "ERROR: _set_scale_mode: invalid zoom mode"; exit 1;;
+  esac
+  SCALE_MODE="$1"
+  _save_config && echo "SCALE_MODE set to ${SCALE_MODE}"
+}
+#@+node:caminhante.20240213145217.1: ** function _show_config
+function _show_config {
+  _shell_cat "$CONFIG_FILE"
+}
+#@+node:caminhante.20240213130523.1: ** function _save_config
+function _save_config {
+  _shell_cat <<EOF > "$CONFIG_FILE"
+CUTSTART="${CUTSTART:-00:00}"
+DURATION="${DURATION:-10}"
+TRANSITION="${TRANSITION:-0.1}"
+SCALE_MODE=${SCALE_MODE:-scale}
+EOF
+}
+#@+node:caminhante.20240213124955.1: ** function _internal_loop
+function _internal_loop {
+  local frames=( $(find "$WALLPAPER_DIR" -mindepth 1 | sort) )
+  local nframes=$(printf '"%s"\n' "${frames[@]}" | wc -l)
+  [[ $nframes -eq 0 ]] && { echo "ERROR: _internal_loop: no frames to present"; exit 1; }
+  if [[ $nframes -eq 1 ]]; then
+    _feh_image "${frames[0]}"
   else
-    if [[ "$1" -gt "$(ls -d1 ${_dir_vid}/* | wc -l)" ]]; then
-      echo "${_lang[29]} $(ls -d1 ${_dir_vid}/* | wc -l)"
-      exit 1
-    else
-      t=$(ls ${_dir_vid}/${1}/* | wc -l)
-      let t=t-1
-      i=1
-      # ctrl_c
-      while : ; do
-        feh --bg-scale $(ls -1 ${_dir_vid}/${1}/* | sed -n "${i}p")
-        sleep 0.01
-        let i=i+1
-        [[ "${i}" -gt "${t}" ]] && i=1
+    while :; do
+      printf '%s\n' "${frames[@]}" | while read file; do
+        _feh_image "$file" && \
+        _shell_sleep $TRANSITION
       done
-    fi
+    done
   fi
 }
-#@+node:caminhante.20240213011350.1: ** /principal
-[[ ! -d "${_dir_img}" ]] && mkdir -p "${_dir_img}"
-[[ ! -d "${_dir_vid}" ]] && mkdir -p "${_dir_vid}"
+#@+node:caminhante.20240213130854.1: ** function _pause_wallpaper_loop
+function _pause_wallpaper_loop {
+  _kill_loop && \
+    echo "wallpaper frames repaint loop stopped"
+}
+#@+node:caminhante.20240213130926.1: ** function _start_wallpaper_loop
+function _start_wallpaper_loop {
+  _kill_loop
+  wallset --loop &
+  echo "wallpaper frames repaint loop started"
+}
+#@+node:caminhante.20240213131352.1: ** function _verify_command
+function _verify_command {
+  command -v $1 >/dev/null || { echo "ERROR: _verify_command: ${1} command could not be found as builtin or at \$PATH"; exit 1; }
+}
+#@+node:caminhante.20240213125814.1: ** /variáveis e configuração
+CONFIG_DIR="${HOME}/.config/wallset"
+WALLPAPER_DIR="${CONFIG_DIR}/frames/"
+CONFIG_FILE="${CONFIG_DIR}/config"
 
-while [[ "$1" ]]; do
-  case "${1}" in
-    -h|--help) _usage;;
-    -v|--version) echo "${0##*/} 0.2";;
-    -s|--show) _show && exit;;
-    -c|--count) _count;;
-    -d|--display) _current;;
-    -t|--time) shift
-      if [[ $(echo "$1" | sed -n -r '/^[0-9]+$/p') == "" ]]; then
-         echo "${_lang[30]}"
-      else
-        _loop "$1"
-      fi
-      ;;
-    -q|--quit) _quit_loop;;
-    -S|--set) export add=1;;
-    -a|--add) shift
-      while [[ -f "${1}" ]]; do
-         if [[ "$(file ${1} | awk '{print $2}')" == @(PNG|JPEG) ]]; then
-          _resize_img $1
-         else
-           echo "${_lang[31]}: $1"
-         fi
-         shift
-      done
-      ;;
-    -u|--use) shift
-
-      ls ${_dir_img}/*.jpg 2>/dev/null >/dev/null
-      if [[ "$?" != "0" ]]; then
-          echo "${_lang[37]}"
-          exit 1
-      fi
-
-      if [[ $(echo "$1" | sed -n -r '/^[0-9]+$/p') == "" ]]; then
-           echo "${_lang[32]} $(_last_wall)"
-      else
-         if [[ "$1" > "$(_last_wall)" ]]; then
-           echo "${_lang[32]} $(_last_wall)"
-         else
-           _set_img "$1"
-         fi
-      fi
-      ;;
-    -r|--remove-last) rm "${_dir_img}/wallpaper-$(_last_wall).jpg";;
-    --video|-V) shift;
-            [[ -z "$1" ]] && { echo "${_lang[36]}"; exit 1; }
-            [[ $(file -b --mime-type ${1} | cut -d"/" -f1) != 'video' ]] && { echo "${_lang[33]}"; exit 1; }
-            [[ $(file -b --mime-type ${1} | cut -d"/" -f2) != @(mp4|x-m4v) ]] && { echo "${_lang[34]}"; exit 1; }
-            _video "${1}"
-    ;;
-    -L|--list-videos) _list_vid ;;
-    -I|--set-video) shift; _set_video "${1}";;
-  esac
-  shift
-done
+mkdir -p "$WALLPAPER_DIR"
+[ -f "$CONFIG_FILE" ] || _save_config
+. "$CONFIG_FILE"
+#@+node:caminhante.20240213131038.1: ** /verificação
+# wallset precisa estar acessível em $PATH para o script funcionar corretamente
+_verify_command wallset
+_verify_command sed
+_verify_command pgrep
+_verify_command feh
+_verify_command ffmpeg
+#@+node:caminhante.20240213023405.1: ** /principal
+NEED_RESTART=
+if [[ "$1" =~ ^((-{1,2})([Hh]$|[Hh][Ee][Ll][Pp])|)$ ]]; then
+  _usage
+  exit 1
+else
+  while [[ $# -gt 0 ]]; do
+    opt="$1"
+    shift
+    case "$opt" in
+      "-i"|"--image"    ) _set_image "$1"; NEED_RESTART=y; shift;;
+      "-v"|"--video"    ) _set_video "$1"; NEED_RESTART=y; shift;;
+      "-f"|"--from"     ) _set_cutstart "$1"; shift;;
+      "-d"|"--duration" ) _set_duration "$1"; shift;;
+      "-a"|"--append-image" ) _append_image "$1"; NEED_RESTART=y; shift;;
+      "-t"|"--transition" ) _set_transition "$1"; NEED_RESTART=y; shift;;
+      "-z"|"--zoom-mode"  ) _set_scale_mode "$1"; NEED_RESTART=y; shift;;
+      "-p"|"--pause"  ) _pause_wallpaper_loop;;
+      "-s"|"--start"  ) _start_wallpaper_loop;;
+      "-c"|"--config" ) _show_config;;
+      "--loop" ) _internal_loop;;
+      *) echo "ERROR: Invalid option: \"${opt}\"" >&2; exit 1;;
+    esac
+  done
+fi
+[[ -z $NEED_RESTART ]] || _start_wallpaper_loop
+exit 0
 #@-others
 #@-leo
