@@ -13,24 +13,21 @@ First you will need to have the dependencies installed on your system:
 > Some software may work in versions lower than those reported.
 
 ```sh
-git clone https://github.com/terroo/wallset down-wallset
-cd down-wallset
-sudo sh install.sh
-```
-# The installer says that a package is not installed, but are you sure it is?
-Then force the installation with the parameter `--force`:
-```sh
-sudo ./install.sh --force
+git clone https://github.com/terroo/wallset wallset
+cd wallset
+cp -v ./wallset ~/.local/bin
+# otherwise, to keep updating the script with git:
+ln -svf $PWD/wallset ~/.local/bin/
 ```
 
 # Use
 ```sh
 usage: wallset [options]
-  
+
   Options:
     -u,--use [N]          Change the Wallpaper to the number entered. Use images with 3 digits, example: 014,003,099
     -a,--add img.jpg ...  Add images
-    -S,--set              Use before the -a, --add parameter when you want to add already change       
+    -S,--set              Use before the -a, --add parameter when you want to add already change
     -q,--quit             Ends the loop
     -t,--time [N]         Creates an image loop with the time reported in seconds
     -d,--display          Opens the last image added
@@ -43,7 +40,7 @@ usage: wallset [options]
     -h,--help             Display this help
     -v,--version          Display the version of this program
 
-  Examples:  
+  Examples:
     Add an image → 'wallset -a img.jpg'
     Add and set it as Wallpaper → 'wallset --set --add img.jpg'
     Change to image with this number → 'wallset -u 001'
@@ -56,11 +53,9 @@ usage: wallset [options]
 **** Use 3-digit images, example: 011
 ```
 
-There is a video that demonstrates the use at the address (pt-BR): <https://youtu.be/Mb0SXMft2sw>
-
 # Uninstall
 ```sh
-git clone https://github.com/terroo/wallset down-wallset
-cd down-wallset
-sudo sh install.sh uninstall
+rm -v ~/.local/bin/wallset
+# do whatever with the git repo you downloaded
 ```
+
