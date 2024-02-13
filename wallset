@@ -92,7 +92,10 @@ exit
 }
 #@+node:caminhante.20240213125451.1: ** function _shell_sleep
 function _shell_sleep {
-  ! read -u 1 -t $1 2>/dev/null </dev/zero
+  find "${CONFIG_DIR}/" -name wait -type p | grep -q wait || \
+    mkfifo "${CONFIG_DIR}/wait"
+  exec 5<>"${CONFIG_DIR}/wait"
+  read -u5 -t $1
 }
 #@+node:caminhante.20240213125458.1: ** function _shell_cat
 function _shell_cat {
