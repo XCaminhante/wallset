@@ -92,8 +92,6 @@ exit
 }
 #@+node:caminhante.20240213125451.1: ** function _shell_sleep
 function _shell_sleep {
-  find "${CONFIG_DIR}/" -name wait -type p | grep -q wait || \
-    mkfifo "${CONFIG_DIR}/wait"
   exec 5<>"${CONFIG_DIR}/wait"
   read -u5 -t $1
 }
@@ -225,6 +223,8 @@ WALLPAPER_DIR="${CONFIG_DIR}/frames/"
 CONFIG_FILE="${CONFIG_DIR}/config"
 
 mkdir -p "$WALLPAPER_DIR"
+find "${CONFIG_DIR}/" -name wait -type p | grep -q wait || mkfifo "${CONFIG_DIR}/wait"
+
 [ -f "$CONFIG_FILE" ] || _save_config
 . "$CONFIG_FILE"
 #@+node:caminhante.20240213131038.1: ** /verificação
