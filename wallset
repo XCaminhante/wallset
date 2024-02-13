@@ -70,157 +70,155 @@ exit
 }
 #@+node:caminhante.20240213012318.1: ** ctrl_c
 function ctrl_c {
-    exit 127
+  exit 127
 }
-#@+node:caminhante.20240213012304.1: ** _get_resolution_screen
-function _get_resolution_screen {
-    xrandr | grep '*' | awk '{print $1}' | cut -dx -f1
+#@+node:caminhante.20240213012304.1: ** _get_screen_width
+function _get_screen_width {
+  xrandr --current | sed -r '/current/!d; s/^.*current ([0-9]+) x.*$/\1/'
 }
 #@+node:caminhante.20240213012252.1: ** _last_wall
 function _last_wall {
-    ls ${_dir_img}/*.jpg 2>/dev/null >/dev/null
-    if [[ "$?" != "0" ]]; then
-        printf "%s" "0"
-    else
-        _n=$(ls -1 ${_dir_img}/*.jpg | tail -n 1 | tr -d 'a-z\.\-\/')
-        printf "%s" "${_n}"
-    fi
+  ls ${_dir_img}/*.jpg 2>/dev/null >/dev/null
+  if [[ "$?" != "0" ]]; then
+    printf "%s" "0"
+  else
+    _n=$(ls -1 ${_dir_img}/*.jpg | tail -n 1 | tr -d 'a-z\.\-\/')
+    printf "%s" "${_n}"
+  fi
 }
 #@+node:caminhante.20240213012244.1: ** _new_number
 function _new_number {
-    _n=$(echo $(_last_wall) + 1 | bc)
-    [[ $(expr length ${_n}) == 1 ]] && _n="00${_n}" || _n="0${_n}"
-    printf "%s" "${_n}"
+  _n=$(echo $(_last_wall) + 1 | bc)
+  [[ $(expr length ${_n}) == 1 ]] && _n="00${_n}" || _n="0${_n}"
+  printf "%s" "${_n}"
 }
 #@+node:caminhante.20240213012231.1: ** _resize_img
 function _resize_img {
-    _n=$(_new_number)
-    _w=$(_get_resolution_screen)
-    convert -resize "${_w}" "${1}" "${_dir_img}/wallpaper-${_n}.jpg"
-    if [[ "${add}" == 1 ]]; then
-        feh --bg-scale "${_dir_img}/wallpaper-${_n}.jpg"
-        [[ $(which gsettings >&- 2>&-) ]] && \
-            gsettings set org.gnome.desktop.background picture-uri file:///"${_dir_img}/wallpaper-${_n}.jpg"
-    fi
+  _n=$(_new_number)
+  _w=$(_get_screen_width)
+  convert -resize "${_w}" "${1}" "${_dir_img}/wallpaper-${_n}.jpg"
+  if [[ "${add}" == 1 ]]; then
+    feh --bg-scale "${_dir_img}/wallpaper-${_n}.jpg"
+    [[ $(which gsettings >&- 2>&-) ]] && \
+        gsettings set org.gnome.desktop.background picture-uri file:///"${_dir_img}/wallpaper-${_n}.jpg"
+  fi
 }
 #@+node:caminhante.20240213012221.1: ** _count
 function _count {
-    ls ${_dir_img}/*.jpg 2>/dev/null | wc -l
+  ls ${_dir_img}/*.jpg 2>/dev/null | wc -l
 }
 #@+node:caminhante.20240213012212.1: ** _current
 function _current {
-    xdg-open "${_dir_img}/wallpaper-$(_last_wall).jpg"
+  xdg-open "${_dir_img}/wallpaper-$(_last_wall).jpg"
 }
 #@+node:caminhante.20240213012203.1: ** _loop
 function _loop {
   # BUG esse loop não é interrompível externamente
-    if [[ $(_count) < 1 ]]; then
-        printf "%s\n" "${_lang[26]}"
-        exit 1
+  if [[ $(_count) < 1 ]]; then
+    printf "%s\n" "${_lang[26]}"
+    exit 1
+  fi
+  i=1;
+  while : ; do
+    [[ "${i}" -ge "$(_count)" ]] && i=1
+    if [[ $(expr length $i) == 1 ]]; then
+      feh --bg-scale "${_dir_img}/wallpaper-00${i}.jpg"
+    else
+      feh --bg-scale "${_dir_img}/wallpaper-0${i}.jpg"
     fi
-    i=1;
-    while : ; do
-        [[ "${i}" -ge "$(_count)" ]] && i=1
-        if [[ $(expr length $i) == 1 ]]; then
-            feh --bg-scale "${_dir_img}/wallpaper-00${i}.jpg"
-        else
-            feh --bg-scale "${_dir_img}/wallpaper-0${i}.jpg"
-        fi
-        sleep $1
-        let i=i+1
-    done &
-
+    sleep $1
+    let i=i+1
+  done &
 }
 #@+node:caminhante.20240213011553.1: ** _quit_loop
 function _quit_loop {
   # BUG isso mata todos os shells em execução no sistema
   # BUG obviamente não é o objetivo da função
-    #kill -9 $$
-    killall -q bash 2>/dev/null >/dev/null
+  killall -q bash 2>/dev/null >/dev/null
 }
 #@+node:caminhante.20240213011507.1: ** _set_img
 function _set_img {
-    ls "${_dir_img}/wallpaper-${1}.jpg" >/dev/null 2>/dev/null
-    if [[ "$?" == 0 ]]; then
-        feh --bg-scale "${_dir_img}/wallpaper-$1.jpg"
-        if [[ $(which gsettings >&- 2>&-) && "$XDG_CURRENT_DESKTOP" == "GNOME" ]]; then
-            gsettings set org.gnome.desktop.background picture-uri file:///"${_dir_img}/wallpaper-$1.jpg"
-        fi
-    else
-        _t=$(_count)
-        [[ "${_t}" -lt 100 ]] && _t="0${_t}"
-        echo "$1 - ${_lang[35]}: "$(ls ${_dir_img} | sed 's/wallpaper-//;s/\.jpg/ /g')
+  ls "${_dir_img}/wallpaper-${1}.jpg" >/dev/null 2>/dev/null
+  if [[ "$?" == 0 ]]; then
+    feh --bg-scale "${_dir_img}/wallpaper-$1.jpg"
+    if [[ $(which gsettings >&- 2>&-) && "$XDG_CURRENT_DESKTOP" == "GNOME" ]]; then
+      gsettings set org.gnome.desktop.background picture-uri file:///"${_dir_img}/wallpaper-$1.jpg"
     fi
+  else
+    _t=$(_count)
+    [[ "${_t}" -lt 100 ]] && _t="0${_t}"
+    echo "$1 - ${_lang[35]}: "$(ls ${_dir_img} | sed 's/wallpaper-//;s/\.jpg/ /g')
+  fi
 }
 #@+node:caminhante.20240213011454.1: ** _show
 function _show {
-    egrep -o '[0-9]{3}' "${HOME}/.fehbg"
+  egrep -o '[0-9]{3}' "${HOME}/.fehbg"
 }
 #@+node:caminhante.20240213011444.1: ** _video
 function _video {
-    a=1
-    for i in $(ls -d $_dir_vid/*/ 2>/dev/null); do
-       if [[ -d "$_dir_vid/$a" ]]; then
-           let a=a+1
-       fi
-    done
+  a=1
+  for i in $(ls -d $_dir_vid/*/ 2>/dev/null); do
+    if [[ -d "$_dir_vid/$a" ]]; then
+      let a=a+1
+    fi
+  done
 
-    mkdir -p "$_dir_vid/$a"
+  mkdir -p "$_dir_vid/$a"
 
-    echo -e "${_lang[27]}...\r"
-    ffmpeg -y -ss 00:00 -i ${1} -t 10 "${_dir_vid}/${a}/filename%05d.jpg" > ${_dir_vid}/${a}/video.info 2>&1
-    t=$(ls ${_dir_vid}/${a}/* | wc -l)
-    let t=t-1
-    echo ${1} > ${_dir_vid}/${a}/video.info
+  echo -e "${_lang[27]}...\r"
+  ffmpeg -y -ss 00:00 -i ${1} -t 10 "${_dir_vid}/${a}/filename%05d.jpg" > ${_dir_vid}/${a}/video.info 2>&1
+  t=$(ls ${_dir_vid}/${a}/* | wc -l)
+  let t=t-1
+  echo ${1} > ${_dir_vid}/${a}/video.info
 
-    i=1
-    # ctrl_c
-    while : ; do
-        feh --bg-scale $(ls -1 ${_dir_vid}/${a}/* | sed -n "${i}p")
-        sleep 0.01
-        let i=i+1
-        [[ "${i}" -gt "${t}" ]] && i=1
-    done
+  i=1
+  # ctrl_c
+  while : ; do
+    feh --bg-scale $(ls -1 ${_dir_vid}/${a}/* | sed -n "${i}p")
+    sleep 0.01
+    let i=i+1
+    [[ "${i}" -gt "${t}" ]] && i=1
+  done
 }
 #@+node:caminhante.20240213011430.1: ** _list_vid
 function _list_vid {
-    ls -d ${_dir_vid}/* 2>/dev/null >/dev/null
-    if [[ "$?" != "0" ]]; then
-        echo ${_lang[38]}
-        exit 1
-    fi
-    for i in $(ls -1 ${_dir_vid}/*/video.info); do
-        echo $i | awk 'BEGIN { FS = "/" } ; { print $6 }'
-        cat $i
-    done | paste - - | sed 's/\t/ → /g'
+  ls -d ${_dir_vid}/* 2>/dev/null >/dev/null
+  if [[ "$?" != "0" ]]; then
+    echo ${_lang[38]}
+    exit 1
+  fi
+  for i in $(ls -1 ${_dir_vid}/*/video.info); do
+    echo $i | awk 'BEGIN { FS = "/" } ; { print $6 }'
+    cat $i
+  done | paste - - | sed 's/\t/ → /g'
 }
 
 #@+node:caminhante.20240213011402.1: ** _set_video
 function _set_video {
-    ls -d ${_dir_vid}/* 2>/dev/null >/dev/null
-    if [[ "$?" != "0" ]]; then
-        echo ${_lang[38]}
-        exit 1
-    fi
-    if [[ $(echo "$1" | sed -n -r '/^[0-9]+$/p') == "" ]]; then
-        echo "${_lang[28]} '${0##*/} --list-videos'."
+  ls -d ${_dir_vid}/* 2>/dev/null >/dev/null
+  if [[ "$?" != "0" ]]; then
+    echo ${_lang[38]}
+    exit 1
+  fi
+  if [[ $(echo "$1" | sed -n -r '/^[0-9]+$/p') == "" ]]; then
+    echo "${_lang[28]} '${0##*/} --list-videos'."
+  else
+    if [[ "$1" -gt "$(ls -d1 ${_dir_vid}/* | wc -l)" ]]; then
+      echo "${_lang[29]} $(ls -d1 ${_dir_vid}/* | wc -l)"
+      exit 1
     else
-        if [[ "$1" -gt "$(ls -d1 ${_dir_vid}/* | wc -l)" ]]; then
-            echo "${_lang[29]} $(ls -d1 ${_dir_vid}/* | wc -l)"
-            exit 1
-        else
-            t=$(ls ${_dir_vid}/${1}/* | wc -l)
-            let t=t-1
-            i=1
-            # ctrl_c
-            while : ; do
-                feh --bg-scale $(ls -1 ${_dir_vid}/${1}/* | sed -n "${i}p")
-                sleep 0.01
-                let i=i+1
-                [[ "${i}" -gt "${t}" ]] && i=1
-            done
-        fi
+      t=$(ls ${_dir_vid}/${1}/* | wc -l)
+      let t=t-1
+      i=1
+      # ctrl_c
+      while : ; do
+        feh --bg-scale $(ls -1 ${_dir_vid}/${1}/* | sed -n "${i}p")
+        sleep 0.01
+        let i=i+1
+        [[ "${i}" -gt "${t}" ]] && i=1
+      done
     fi
+  fi
 }
 #@+node:caminhante.20240213011350.1: ** /principal
 [[ ! -d "${_dir_img}" ]] && mkdir -p "${_dir_img}"
