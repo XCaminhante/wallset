@@ -105,7 +105,7 @@ function _shell_cat {
 #@+node:caminhante.20240213123219.1: ** function _feh_image
 function _feh_image {
   local file="$1"
-  feh --no-fehbg --bg-${SCALE_MODE} "${file}" # 2>/dev/null >/dev/null
+  feh --no-fehbg --bg-${SCALE_MODE} -- "${file}" # 2>/dev/null >/dev/null
 }
 #@+node:caminhante.20240213132656.1: ** function _clear_frames
 function _clear_frames {
@@ -132,7 +132,7 @@ function _append_image {
   # local destination="$(mktemp -u -p "$WALLPAPER_DIR" -t 'frameXXXXXXXX.png')"
   local destination="${WALLPAPER_DIR}/frame$(_utcnanodate).png"
   [[ -f "$origin" ]] || { echo "ERROR: _append_image: origin file does not exist"; exit 1; }
-  cp "$origin" "$destination" && \
+  cp -- "$origin" "$destination" && \
     echo "image '${1}' added to wallpaper frames set"
 }
 #@+node:caminhante.20240213134749.1: ** function _set_image
