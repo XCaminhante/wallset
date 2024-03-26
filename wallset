@@ -53,6 +53,11 @@ Options:
   By default, wallset extracts 10 seconds from the video (that's approximately 300 frames)
   Consult the ffmpeg manual if you have any doubts about the syntax
 
+  -w,--width 1680
+  Sets the frame width scaling
+  By default, wallset scales frames to be 1680 pixels wide
+  Set this to your screen width
+
   -a,--append-image <image file.{jpg,png}>
   Appends an image to the current wallpaper image set
   This argument can be used several times on the same command line
@@ -118,7 +123,7 @@ function _video_to_frames {
   local origin="$1"
   [[ -f "$origin" ]] || { echo "ERROR: _video_to_frames: origin file does not exist"; exit 1; }
   echo "preparing frames..."
-  ffmpeg -y -ss $CUTSTART -i "$origin" -qscale:v 2 -t $DURATION \
+  ffmpeg -y -ss $CUTSTART -i "$origin" -vf scale="$SCREEN_WIDTH:-1" -q:v 2 -t $DURATION \
   "${WALLPAPER_DIR}/frame%08d.png" >/dev/null 2>&1 && \
     echo "frames extrated from '${1}', cut starting at ${CUTSTART}, duration ${DURATION}"
 }
@@ -159,6 +164,11 @@ function _set_duration {
   DURATION="$1"
   _save_config && echo "DURATION set to ${DURATION}"
 }
+#@+node:caminhante.20240326140639.1: ** function _set_width
+function _set_width {
+  SCREEN_WIDTH="$1"
+  _save_config && echo "SCREEN_WIDTH set to ${SCREEN_WIDTH}"
+}
 #@+node:caminhante.20240213135743.1: ** function _set_transition
 function _set_transition {
   TRANSITION="$1"
@@ -184,6 +194,7 @@ CUTSTART="${CUTSTART:-00:00}"
 DURATION="${DURATION:-10}"
 TRANSITION="${TRANSITION:-0.1}"
 SCALE_MODE=${SCALE_MODE:-scale}
+SCREEN_WIDTH=${SCREEN_WIDTH:-1680}
 EOF
 }
 #@+node:caminhante.20240213124955.1: ** function _internal_loop
@@ -248,6 +259,7 @@ else
       "-v"|"--video"    ) _set_video "$1"; NEED_RESTART=y; shift;;
       "-f"|"--from"     ) _set_cutstart "$1"; shift;;
       "-d"|"--duration" ) _set_duration "$1"; shift;;
+      "-w"|"--width"    ) _set_width "$1"; shift;;
       "-a"|"--append-image" ) _append_image "$1"; NEED_RESTART=y; shift;;
       "-t"|"--transition" ) _set_transition "$1"; NEED_RESTART=y; shift;;
       "-z"|"--zoom-mode"  ) _set_scale_mode "$1"; NEED_RESTART=y; shift;;
