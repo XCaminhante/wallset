@@ -31,7 +31,7 @@ function _usage {
 #@+node:caminhante.20240213142725.1: *3* Usage
 ```sh
 Wallset: shows one or more images in a loop as a live wallpaper
-Version 0.2
+Version 0.6
 
 Usage: wallset [options]
 Options:

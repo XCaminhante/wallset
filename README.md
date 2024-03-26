@@ -24,7 +24,7 @@ ln -svf $PWD/wallset ~/.local/bin/
 # Usage
 ```sh
 Wallset: shows one or more images in a loop as a live wallpaper
-Version 0.2
+Version 0.6
 
 Usage: wallset [options]
 Options:
