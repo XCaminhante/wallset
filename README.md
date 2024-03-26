@@ -46,6 +46,11 @@ Options:
   By default, wallset extracts 10 seconds from the video (that's approximately 300 frames)
   Consult the ffmpeg manual if you have any doubts about the syntax
 
+  -w,--width 1680
+  Sets the frame width scaling
+  By default, wallset scales frames to be 1680 pixels wide
+  Set this to your screen width
+
   -a,--append-image <image file.{jpg,png}>
   Appends an image to the current wallpaper image set
   This argument can be used several times on the same command line
